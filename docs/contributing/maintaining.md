@@ -388,6 +388,7 @@ Environment variables (beyond standard AWS Go SDK ones) used by acceptance testi
 | `AWS_LAMBDA_IMAGE_LATEST_ID` | ECR repository image URI (tagged as `latest`) for Lambda container image acceptance tests.
 | `AWS_LAMBDA_IMAGE_V1_ID` | ECR repository image URI (tagged as `v1`) for Lambda container image acceptance tests.
 | `AWS_LAMBDA_IMAGE_V2_ID` | ECR repository image URI (tagged as `v2`) for Lambda container image acceptance tests.
+| `AWS_S3_BUCKET_LOGGING_AMAZON_CUSTOMER_EMAIL` | Email address for S3 Bucket Logging testing.
 | `DX_CONNECTION_ID` | Identifier for Direct Connect Connection testing. |
 | `DX_VIRTUAL_INTERFACE_ID` | Identifier for Direct Connect Virtual Interface testing. |
 | `EC2_SECURITY_GROUP_RULES_PER_GROUP_LIMIT` | EC2 Quota for Rules per Security Group. Defaults to 50. **DEPRECATED:** Can be augmented or replaced with Service Quotas lookup. |
