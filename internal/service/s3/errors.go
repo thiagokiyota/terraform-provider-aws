@@ -6,5 +6,5 @@ package s3
 const (
 	ErrCodeNoSuchConfiguration                  = "NoSuchConfiguration"
 	ErrCodeNoSuchPublicAccessBlockConfiguration = "NoSuchPublicAccessBlockConfiguration"
-	ErrCodeOperationAborted                     = "OperationAborted"
+	ErrCodeServerSideEncryptionNotFound         = "ServerSideEncryptionConfigurationNotFoundError"
 )
