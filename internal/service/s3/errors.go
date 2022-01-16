@@ -5,6 +5,7 @@ package s3
 
 const (
 	ErrCodeNoSuchConfiguration                  = "NoSuchConfiguration"
+	ErrCodeNoSuchCorsConfiguration              = "NoSuchCORSConfiguration"
 	ErrCodeNoSuchPublicAccessBlockConfiguration = "NoSuchPublicAccessBlockConfiguration"
 	ErrCodeOperationAborted                     = "OperationAborted"
 )
