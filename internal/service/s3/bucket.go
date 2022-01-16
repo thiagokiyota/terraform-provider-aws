@@ -609,47 +609,45 @@ func ResourceBucket() *schema.Resource {
 			},
 
 			"object_lock_configuration": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:       schema.TypeList,
+				Computed:   true,
+				Deprecated: "Use the aws_s3_bucket_object_lock_configuration resource instead when available in a future minor version",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"object_lock_enabled": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice(s3.ObjectLockEnabled_Values(), false),
+							Type:       schema.TypeString,
+							Computed:   true,
+							Deprecated: "Use the aws_s3_bucket_object_lock_configuration resource instead when available in a future minor version",
 						},
 
 						"rule": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
+							Type:       schema.TypeList,
+							Computed:   true,
+							Deprecated: "Use the aws_s3_bucket_object_lock_configuration resource instead when available in a future minor version",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"default_retention": {
-										Type:     schema.TypeList,
-										Required: true,
-										MinItems: 1,
-										MaxItems: 1,
+										Type:       schema.TypeList,
+										Computed:   true,
+										Deprecated: "Use the aws_s3_bucket_object_lock_configuration resource instead when available in a future minor version",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"mode": {
-													Type:         schema.TypeString,
-													Required:     true,
-													ValidateFunc: validation.StringInSlice(s3.ObjectLockRetentionMode_Values(), false),
+													Type:       schema.TypeString,
+													Computed:   true,
+													Deprecated: "Use the aws_s3_bucket_object_lock_configuration resource instead when available in a future minor version",
 												},
 
 												"days": {
-													Type:         schema.TypeInt,
-													Optional:     true,
-													ValidateFunc: validation.IntAtLeast(1),
+													Type:       schema.TypeInt,
+													Computed:   true,
+													Deprecated: "Use the aws_s3_bucket_object_lock_configuration resource instead when available in a future minor version",
 												},
 
 												"years": {
-													Type:         schema.TypeInt,
-													Optional:     true,
-													ValidateFunc: validation.IntAtLeast(1),
+													Type:       schema.TypeInt,
+													Computed:   true,
+													Deprecated: "Use the aws_s3_bucket_object_lock_configuration resource instead when available in a future minor version",
 												},
 											},
 										},
@@ -708,12 +706,6 @@ func resourceBucketCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err := ValidBucketName(bucket, awsRegion); err != nil {
 		return fmt.Errorf("Error validating S3 bucket name: %s", err)
-	}
-
-	// S3 Object Lock can only be enabled on bucket creation.
-	objectLockConfiguration := expandS3ObjectLockConfiguration(d.Get("object_lock_configuration").([]interface{}))
-	if objectLockConfiguration != nil && aws.StringValue(objectLockConfiguration.ObjectLockEnabled) == s3.ObjectLockEnabledEnabled {
-		req.ObjectLockEnabledForBucket = aws.Bool(true)
 	}
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -837,12 +829,6 @@ func resourceBucketUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("server_side_encryption_configuration") {
 		if err := resourceBucketServerSideEncryptionConfigurationUpdate(conn, d); err != nil {
-			return err
-		}
-	}
-
-	if d.HasChange("object_lock_configuration") {
-		if err := resourceBucketObjectLockConfigurationUpdate(conn, d); err != nil {
 			return err
 		}
 	}
@@ -1304,20 +1290,22 @@ func resourceBucketRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Object Lock configuration.
-	conf, err := readS3ObjectLockConfiguration(conn, d.Id())
+	resp, err := verify.RetryOnAWSCode(s3.ErrCodeNoSuchBucket, func() (interface{}, error) {
+		return conn.GetObjectLockConfiguration(&s3.GetObjectLockConfigurationInput{
+			Bucket: aws.String(d.Id()),
+		})
+	})
 
-	// Object lock not supported in all partitions (extra guard, also guards in read func)
-	if err != nil && (meta.(*conns.AWSClient).Partition == endpoints.AwsPartitionID || meta.(*conns.AWSClient).Partition == endpoints.AwsUsGovPartitionID) {
-		return fmt.Errorf("error getting S3 Bucket Object Lock configuration: %s", err)
+	// Certain S3 implementations do not include this API
+	if err != nil && !tfawserr.ErrCodeEquals(err, ErrCodeMethodNotAllowed, ErrCodeObjectLockConfigurationNotFound) {
+		if meta.(*conns.AWSClient).Partition == endpoints.AwsPartitionID || meta.(*conns.AWSClient).Partition == endpoints.AwsUsGovPartitionID {
+			return fmt.Errorf("error getting S3 Bucket (%s) Object Lock configuration: %w", d.Id(), err)
+		}
 	}
 
-	if err != nil {
-		log.Printf("[WARN] Unable to read S3 bucket (%s) object lock configuration: %s", d.Id(), err)
-	}
-
-	if err == nil {
-		if err := d.Set("object_lock_configuration", conf); err != nil {
-			return fmt.Errorf("error setting object_lock_configuration: %s", err)
+	if output, ok := resp.(*s3.GetObjectLockConfigurationOutput); ok {
+		if err := d.Set("object_lock_configuration", flattenS3ObjectLockConfiguration(output.ObjectLockConfiguration)); err != nil {
+			return fmt.Errorf("error setting object_lock_configuration: %w", err)
 		}
 	}
 
@@ -2009,23 +1997,6 @@ func resourceBucketServerSideEncryptionConfigurationUpdate(conn *s3.S3, d *schem
 
 	if err != nil {
 		return fmt.Errorf("error putting S3 server side encryption configuration: %s", err)
-	}
-
-	return nil
-}
-
-func resourceBucketObjectLockConfigurationUpdate(conn *s3.S3, d *schema.ResourceData) error {
-	// S3 Object Lock configuration cannot be deleted, only updated.
-	req := &s3.PutObjectLockConfigurationInput{
-		Bucket:                  aws.String(d.Get("bucket").(string)),
-		ObjectLockConfiguration: expandS3ObjectLockConfiguration(d.Get("object_lock_configuration").([]interface{})),
-	}
-
-	_, err := verify.RetryOnAWSCode(s3.ErrCodeNoSuchBucket, func() (interface{}, error) {
-		return conn.PutObjectLockConfiguration(req)
-	})
-	if err != nil {
-		return fmt.Errorf("error putting S3 object lock configuration: %s", err)
 	}
 
 	return nil
@@ -2801,27 +2772,6 @@ type S3Website struct {
 //
 // S3 Object Lock functions.
 //
-
-func readS3ObjectLockConfiguration(conn *s3.S3, bucket string) ([]interface{}, error) {
-	resp, err := verify.RetryOnAWSCode(s3.ErrCodeNoSuchBucket, func() (interface{}, error) {
-		return conn.GetObjectLockConfiguration(&s3.GetObjectLockConfigurationInput{
-			Bucket: aws.String(bucket),
-		})
-	})
-	if err != nil {
-		// Certain S3 implementations do not include this API
-		if tfawserr.ErrMessageContains(err, "MethodNotAllowed", "") {
-			return nil, nil
-		}
-
-		if tfawserr.ErrMessageContains(err, "ObjectLockConfigurationNotFoundError", "") {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return flattenS3ObjectLockConfiguration(resp.(*s3.GetObjectLockConfigurationOutput).ObjectLockConfiguration), nil
-}
 
 func expandS3ObjectLockConfiguration(vConf []interface{}) *s3.ObjectLockConfiguration {
 	if len(vConf) == 0 || vConf[0] == nil {

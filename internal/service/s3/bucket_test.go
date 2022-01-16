@@ -2505,46 +2505,6 @@ func TestAccS3Bucket_Replication_RTC_valid(t *testing.T) {
 	})
 }
 
-func TestAccS3Bucket_Manage_objectLock(t *testing.T) {
-	bucketName := sdkacctest.RandomWithPrefix("tf-test-bucket")
-	resourceName := "aws_s3_bucket.arbitrary"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.PreCheck(t) },
-		ErrorCheck:   acctest.ErrorCheck(t, s3.EndpointsID),
-		Providers:    acctest.Providers,
-		CheckDestroy: testAccCheckBucketDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBucketObjectLockEnabledNoDefaultRetention(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBucketExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "object_lock_configuration.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "object_lock_configuration.0.object_lock_enabled", "Enabled"),
-					resource.TestCheckResourceAttr(resourceName, "object_lock_configuration.0.rule.#", "0"),
-				),
-			},
-			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "acl"},
-			},
-			{
-				Config: testAccBucketObjectLockEnabledWithDefaultRetention(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBucketExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "object_lock_configuration.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "object_lock_configuration.0.object_lock_enabled", "Enabled"),
-					resource.TestCheckResourceAttr(resourceName, "object_lock_configuration.0.rule.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "object_lock_configuration.0.rule.0.default_retention.0.mode", "COMPLIANCE"),
-					resource.TestCheckResourceAttr(resourceName, "object_lock_configuration.0.rule.0.default_retention.0.days", "3"),
-				),
-			},
-		},
-	})
-}
-
 func TestAccS3Bucket_Basic_forceDestroy(t *testing.T) {
 	resourceName := "aws_s3_bucket.bucket"
 	bucketName := sdkacctest.RandomWithPrefix("tf-test-bucket")
@@ -2586,27 +2546,6 @@ func TestAccS3Bucket_Basic_forceDestroyWithEmptyPrefixes(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBucketExists(resourceName),
 					testAccCheckBucketAddObjects(resourceName, "data.txt", "/extraleadingslash.txt"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccS3Bucket_Basic_forceDestroyWithObjectLockEnabled(t *testing.T) {
-	resourceName := "aws_s3_bucket.bucket"
-	bucketName := sdkacctest.RandomWithPrefix("tf-test-bucket")
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.PreCheck(t) },
-		ErrorCheck:   acctest.ErrorCheck(t, s3.EndpointsID),
-		Providers:    acctest.Providers,
-		CheckDestroy: testAccCheckBucketDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBucketConfig_forceDestroyWithObjectLockEnabled(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBucketExists(resourceName),
-					testAccCheckBucketAddObjectsWithLegalHold(resourceName, "data.txt", "prefix/more_data.txt"),
 				),
 			},
 		},
@@ -3004,27 +2943,6 @@ func testAccCheckBucketAddObjects(n string, keys ...string) resource.TestCheckFu
 			_, err := conn.PutObject(&s3.PutObjectInput{
 				Bucket: aws.String(rs.Primary.ID),
 				Key:    aws.String(key),
-			})
-
-			if err != nil {
-				return fmt.Errorf("PutObject error: %s", err)
-			}
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckBucketAddObjectsWithLegalHold(n string, keys ...string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs := s.RootModule().Resources[n]
-		conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
-
-		for _, key := range keys {
-			_, err := conn.PutObject(&s3.PutObjectInput{
-				Bucket:                    aws.String(rs.Primary.ID),
-				Key:                       aws.String(key),
-				ObjectLockLegalHoldStatus: aws.String(s3.ObjectLockLegalHoldStatusOn),
 			})
 
 			if err != nil {
@@ -5037,61 +4955,12 @@ resource "aws_s3_bucket" "bucket" {
 `, randInt)
 }
 
-func testAccBucketObjectLockEnabledNoDefaultRetention(bucketName string) string {
-	return fmt.Sprintf(`
-resource "aws_s3_bucket" "arbitrary" {
-  bucket = %[1]q
-
-  object_lock_configuration {
-    object_lock_enabled = "Enabled"
-  }
-}
-`, bucketName)
-}
-
-func testAccBucketObjectLockEnabledWithDefaultRetention(bucketName string) string {
-	return fmt.Sprintf(`
-resource "aws_s3_bucket" "arbitrary" {
-  bucket = %[1]q
-
-  object_lock_configuration {
-    object_lock_enabled = "Enabled"
-
-    rule {
-      default_retention {
-        mode = "COMPLIANCE"
-        days = 3
-      }
-    }
-  }
-}
-`, bucketName)
-}
-
 func testAccBucketConfig_forceDestroy(bucketName string) string {
 	return fmt.Sprintf(`
 resource "aws_s3_bucket" "bucket" {
   bucket        = "%s"
   acl           = "private"
   force_destroy = true
-}
-`, bucketName)
-}
-
-func testAccBucketConfig_forceDestroyWithObjectLockEnabled(bucketName string) string {
-	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
-  bucket        = "%s"
-  acl           = "private"
-  force_destroy = true
-
-  versioning {
-    enabled = true
-  }
-
-  object_lock_configuration {
-    object_lock_enabled = "Enabled"
-  }
 }
 `, bucketName)
 }
