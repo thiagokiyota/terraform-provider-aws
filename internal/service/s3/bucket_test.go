@@ -3220,28 +3220,6 @@ func testAccCheckBucketCors(n string, corsRules []*s3.CORSRule) resource.TestChe
 	}
 }
 
-func testAccCheckRequestPayer(n, expectedPayer string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs := s.RootModule().Resources[n]
-		conn := acctest.Provider.Meta().(*conns.AWSClient).S3Conn
-
-		out, err := conn.GetBucketRequestPayment(&s3.GetBucketRequestPaymentInput{
-			Bucket: aws.String(rs.Primary.ID),
-		})
-
-		if err != nil {
-			return fmt.Errorf("GetBucketRequestPayment error: %v", err)
-		}
-
-		if *out.Payer != expectedPayer {
-			return fmt.Errorf("bad error request payer type, expected: %v, got %v",
-				expectedPayer, out.Payer)
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckBucketLogging(n, b, p string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
