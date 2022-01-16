@@ -37,49 +37,10 @@ func TestAccS3BucketDataSource_basic(t *testing.T) {
 	})
 }
 
-func TestAccS3BucketDataSource_website(t *testing.T) {
-	bucketName := sdkacctest.RandomWithPrefix("tf-test-bucket")
-	region := acctest.Region()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:   func() { acctest.PreCheck(t) },
-		ErrorCheck: acctest.ErrorCheck(t, s3.EndpointsID),
-		Providers:  acctest.Providers,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBucketWebsiteDataSourceConfig(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBucketExists("data.aws_s3_bucket.bucket"),
-					testAccCheckBucketWebsite("data.aws_s3_bucket.bucket", "index.html", "error.html", "", ""),
-					testAccCheckS3BucketWebsiteEndpoint("data.aws_s3_bucket.bucket", "website_endpoint", bucketName, region),
-				),
-			},
-		},
-	})
-}
-
 func testAccBucketDataSourceConfig_basic(bucketName string) string {
 	return fmt.Sprintf(`
 resource "aws_s3_bucket" "bucket" {
   bucket = %[1]q
-}
-
-data "aws_s3_bucket" "bucket" {
-  bucket = aws_s3_bucket.bucket.id
-}
-`, bucketName)
-}
-
-func testAccBucketWebsiteDataSourceConfig(bucketName string) string {
-	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
-  bucket = %[1]q
-  acl    = "public-read"
-
-  website {
-    index_document = "index.html"
-    error_document = "error.html"
-  }
 }
 
 data "aws_s3_bucket" "bucket" {
