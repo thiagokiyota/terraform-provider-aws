@@ -262,39 +262,42 @@ resource "aws_s3_bucket" "source" {
   provider = aws.central
   bucket   = "tf-test-bucket-source-12345"
   acl      = "private"
-
-  replication_configuration {
-    role = aws_iam_role.replication.arn
-
-    rules {
-      id     = "foobar"
-      status = "Enabled"
-
-      filter {
-        tags = {}
-      }
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-
-        replication_time {
-          status  = "Enabled"
-          minutes = 15
-        }
-
-        metrics {
-          status  = "Enabled"
-          minutes = 15
-        }
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "source" {
   bucket = aws_s3_bucket.source.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "source" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
+  bucket = aws_s3_bucket.source.id
+  role   = aws_iam_role.replication.arn
+
+  rule {
+    id     = "foobar"
+    status = "Enabled"
+
+    filter {
+      tags = {}
+    }
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+
+      replication_time {
+        status  = "Enabled"
+        minutes = 15
+      }
+
+      metrics {
+        status  = "Enabled"
+        minutes = 15
+      }
+    }
   }
 }
 ```

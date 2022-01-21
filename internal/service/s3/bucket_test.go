@@ -4068,7 +4068,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
 
   rule {
@@ -4102,7 +4104,10 @@ resource "aws_s3_bucket_versioning" "bucket" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  # Must have bucket versioning enabled first
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
   rule {
     id     = "rtc"
@@ -4145,7 +4150,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
   rule {
     id     = "rtc-no-minutes"
@@ -4183,7 +4190,10 @@ resource "aws_s3_bucket_versioning" "bucket" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  # Must have bucket versioning enabled first
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
   rule {
     id     = "rtc-no-status"
@@ -4221,7 +4231,10 @@ resource "aws_s3_bucket_versioning" "bucket" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  # Must have bucket versioning enabled first
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
   rule {
     id     = "rtc-no-config"
@@ -4285,8 +4298,10 @@ resource "aws_s3_bucket_versioning" "bucket" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
-  # Must have versioning enabled in the bucket first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  # Must have bucket versioning enabled first
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4389,7 +4404,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.idt
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4465,7 +4482,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4531,7 +4550,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
 
   rules {
@@ -4573,7 +4594,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4613,7 +4636,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4655,7 +4680,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4702,7 +4729,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4733,8 +4762,10 @@ resource "aws_s3_bucket_versioning" "bucket" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
-  # Must have bucket versioning enabled
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  # Must have bucket versioning enabled first
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4790,7 +4821,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4841,7 +4874,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
 
   rules {
@@ -4877,7 +4912,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.test.arn
 
   rule {
@@ -4917,7 +4954,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
 
   rule {
@@ -4957,7 +4996,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
 
   rule {
@@ -5000,7 +5041,9 @@ resource "aws_s3_bucket_versioning" "bucket" {
 
 resource "aws_s3_bucket_replication_configuration" "test" {
   # Must have bucket versioning enabled first
-  bucket = aws_s3_bucket_versioning.bucket.bucket
+  depends_on = [aws_s3_bucket_versioning.bucket]
+
+  bucket = aws_s3_bucket.bucket.id
   role   = aws_iam_role.role.arn
 
   rule {
