@@ -115,6 +115,8 @@ resource "aws_s3_bucket" "source" {
 }
 
 resource "aws_s3_bucket_versioning" "source" {
+  provider = aws.central
+
   bucket = aws_s3_bucket.source.id
   versioning_configuration {
     status = "Enabled"
@@ -122,6 +124,9 @@ resource "aws_s3_bucket_versioning" "source" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "replication" {
+  # Must have bucket versioning enabled first
+  depends_on = [aws_s3_bucket_versioning.source]
+
   role   = aws_iam_role.replication.arn
   bucket = aws_s3_bucket.source.id
 
@@ -172,6 +177,8 @@ resource "aws_s3_bucket" "west" {
 }
 
 resource "aws_s3_bucket_versioning" "west" {
+  provider = west
+
   bucket = aws_s3_bucket.west.id
   versioning_configuration {
     status = "Enabled"
@@ -179,6 +186,9 @@ resource "aws_s3_bucket_versioning" "west" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "east_to_west" {
+  # Must have bucket versioning enabled first
+  depends_on = [aws_s3_bucket_versioning.east]
+
   role   = aws_iam_role.east_replication.arn
   bucket = aws_s3_bucket.east.id
 
@@ -195,6 +205,9 @@ resource "aws_s3_bucket_replication_configuration" "east_to_west" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "west_to_east" {
+  # Must have bucket versioning enabled first
+  depends_on = [aws_s3_bucket_versioning.west]
+
   role   = aws_iam_role.west_replication.arn
   bucket = aws_s3_bucket.west.id
 
