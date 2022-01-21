@@ -3916,10 +3916,6 @@ resource "aws_s3_bucket" "bucket" {
   bucket = %[1]q
   acl    = "private"
 
-  versioning {
-    enabled = false
-  }
-
   lifecycle_rule {
     id      = "id1"
     prefix  = "path1/"
@@ -3959,6 +3955,13 @@ resource "aws_s3_bucket" "bucket" {
       days          = 0
       storage_class = "GLACIER"
     }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 `, bucketName)
@@ -4020,9 +4023,14 @@ POLICY
 resource "aws_s3_bucket" "destination" {
   provider = "awsalternate"
   bucket   = "tf-test-bucket-destination-%[1]d"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "destination" {
+  provider = "awsalternate"
+
+  bucket = aws_s3_bucket.destination.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 `, randInt)
@@ -4033,9 +4041,12 @@ func testAccBucketReplicationConfig(randInt int) string {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 `, randInt)
@@ -4046,10 +4057,6 @@ func testAccBucketReplicationWithConfigurationConfig(randInt int, storageClass s
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4066,6 +4073,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt, storageClass)
 }
 
@@ -4076,9 +4090,7 @@ func testAccBucketReplicationWithReplicationConfigurationWithRTCConfig(randInt i
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-rtc-%[1]d"
   acl    = "private"
-  versioning {
-    enabled = true
-  }
+
   replication_configuration {
     role = aws_iam_role.role.arn
     rules {
@@ -4102,6 +4114,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt, minutes))
 }
 
@@ -4112,9 +4131,7 @@ func testAccBucketReplicationWithReplicationConfigurationWithRTCNoMinutesConfig(
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-rtc-no-minutes-%[1]d"
   acl    = "private"
-  versioning {
-    enabled = true
-  }
+
   replication_configuration {
     role = aws_iam_role.role.arn
     rules {
@@ -4134,6 +4151,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt))
 }
 
@@ -4144,9 +4168,7 @@ func testAccBucketReplicationWithReplicationConfigurationWithRTCNoStatusConfig(r
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-rtc-no-minutes-%[1]d"
   acl    = "private"
-  versioning {
-    enabled = true
-  }
+
   replication_configuration {
     role = aws_iam_role.role.arn
     rules {
@@ -4166,6 +4188,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt))
 }
 
@@ -4176,9 +4205,7 @@ func testAccBucketReplicationWithReplicationConfigurationWithRTCNoConfigConfig(r
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-rtc-no-config-%[1]d"
   acl    = "private"
-  versioning {
-    enabled = true
-  }
+
   replication_configuration {
     role = aws_iam_role.role.arn
     rules {
@@ -4196,6 +4223,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt))
 }
 
@@ -4206,28 +4240,34 @@ func testAccBucketReplicationWithMultipleDestinationsEmptyFilterConfig(randInt i
 resource "aws_s3_bucket" "destination2" {
   provider = "awsalternate"
   bucket   = "tf-test-bucket-destination2-%[1]d"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "destination2" {
+  provider = "awsalternate"
+
+  bucket = aws_s3_bucket.destination2.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket" "destination3" {
   provider = "awsalternate"
   bucket   = "tf-test-bucket-destination3-%[1]d"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "destination3" {
+  provider = "awsalternate"
+
+  bucket = aws_s3_bucket.destination3.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4272,6 +4312,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt))
 }
 
@@ -4282,28 +4329,34 @@ func testAccBucketReplicationWithMultipleDestinationsNonEmptyFilterConfig(randIn
 resource "aws_s3_bucket" "destination2" {
   provider = "awsalternate"
   bucket   = "tf-test-bucket-destination2-%[1]d"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "destination2" {
+  provider = "awsalternate"
+
+  bucket = aws_s3_bucket.destination2.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket" "destination3" {
   provider = "awsalternate"
   bucket   = "tf-test-bucket-destination3-%[1]d"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "destination3" {
+  provider = "awsalternate"
+
+  bucket = aws_s3_bucket.destination3.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4360,6 +4413,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt))
 }
 
@@ -4370,19 +4430,20 @@ func testAccBucketReplicationWithMultipleDestinationsTwoDestinationConfig(randIn
 resource "aws_s3_bucket" "destination2" {
   provider = "awsalternate"
   bucket   = "tf-test-bucket-destination2-%[1]d"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "destination2" {
+  provider = "awsalternate"
+
+  bucket = aws_s3_bucket.destination2.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4420,6 +4481,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt))
 }
 
@@ -4434,10 +4502,6 @@ resource "aws_kms_key" "replica" {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4461,6 +4525,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt)
 }
 
@@ -4471,10 +4542,6 @@ data "aws_caller_identity" "current" {}
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4494,6 +4561,13 @@ resource "aws_s3_bucket" "bucket" {
         }
       }
     }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 `, randInt)
@@ -4522,9 +4596,12 @@ resource "aws_s3_bucket" "bucket" {
       }
     }
   }
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 `, randInt)
@@ -4543,10 +4620,6 @@ resource "aws_kms_key" "replica" {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4575,6 +4648,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt)
 }
 
@@ -4583,10 +4663,6 @@ func testAccBucketReplicationWithoutStorageClassConfig(randInt int) string {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4602,6 +4678,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt)
 }
 
@@ -4610,10 +4693,6 @@ func testAccBucketReplicationWithoutPrefixConfig(randInt int) string {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4627,6 +4706,13 @@ resource "aws_s3_bucket" "bucket" {
         storage_class = "STANDARD"
       }
     }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 `, randInt)
@@ -4662,10 +4748,6 @@ resource "aws_s3_bucket" "bucket" {
   bucket = %[1]q
   acl    = "private"
 
-  versioning {
-    enabled = true
-  }
-
   replication_configuration {
     role = aws_iam_role.test.arn
 
@@ -4687,11 +4769,21 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket" "destination" {
   bucket = %[2]q
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "destination" {
+  bucket = aws_s3_bucket.destination.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 `, rName, rNameDestination))
@@ -4702,10 +4794,6 @@ func testAccBucketReplicationWithV2ConfigurationDeleteMarkerReplicationDisabledC
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4725,6 +4813,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt)
 }
 
@@ -4733,10 +4828,6 @@ func testAccBucketReplicationWithV2ConfigurationNoTagsConfig(randInt int) string
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4758,6 +4849,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt)
 }
 
@@ -4766,10 +4864,6 @@ func testAccBucketReplicationWithV2ConfigurationOnlyOneTagConfig(randInt int) st
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4793,6 +4887,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt)
 }
 
@@ -4801,10 +4902,6 @@ func testAccBucketReplicationWithV2ConfigurationPrefixAndTagsConfig(randInt int)
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4831,6 +4928,13 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 }
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 `, randInt)
 }
 
@@ -4839,10 +4943,6 @@ func testAccBucketReplicationWithV2ConfigurationMultipleTagsConfig(randInt int) 
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.role.arn
@@ -4864,6 +4964,13 @@ resource "aws_s3_bucket" "bucket" {
         storage_class = "STANDARD"
       }
     }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 `, randInt)
@@ -4917,12 +5024,15 @@ resource "aws_s3_bucket" "bucket" {
   acl           = "private"
   force_destroy = true
 
-  versioning {
-    enabled = true
-  }
-
   object_lock_configuration {
     object_lock_enabled = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 `, bucketName)
