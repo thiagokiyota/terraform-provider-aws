@@ -1007,6 +1007,8 @@ resource "aws_s3_bucket_versioning" "source" {
 func testAccBucketReplicationConfigurationBasic(rName, storageClass string) string {
 	return testAccBucketReplicationConfigurationBase(rName) + fmt.Sprintf(`
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1027,6 +1029,8 @@ func testAccBucketReplicationConfigurationRTC(rName string) string {
 	return acctest.ConfigCompose(testAccBucketReplicationConfigurationBase(rName),
 		`
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1061,6 +1065,8 @@ resource "aws_s3_bucket_replication_configuration" "test" {
 func testAccBucketReplicationConfigurationReplicaMods(rName string) string {
 	return testAccBucketReplicationConfigurationBase(rName) + `
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1123,6 +1129,8 @@ resource "aws_s3_bucket_versioning" "destination3" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1216,6 +1224,8 @@ resource "aws_s3_bucket_versioning" "destination3" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1280,6 +1290,8 @@ resource "aws_s3_bucket_versioning" "destination2" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1332,6 +1344,8 @@ resource "aws_kms_key" "test" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1364,6 +1378,8 @@ func testAccBucketReplicationConfigurationWithAccessControlTranslation(rName str
 data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1390,6 +1406,8 @@ func testAccBucketReplicationConfigurationRulesDestination(rName string) string 
 data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1418,6 +1436,8 @@ resource "aws_kms_key" "test" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1451,6 +1471,8 @@ resource "aws_s3_bucket_replication_configuration" "test" {
 func testAccBucketReplicationConfigurationWithoutStorageClass(rName string) string {
 	return testAccBucketReplicationConfigurationBase(rName) + `
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1469,6 +1491,8 @@ resource "aws_s3_bucket_replication_configuration" "test" {
 func testAccBucketReplicationConfigurationWithV2ConfigurationNoTags(rName string) string {
 	return testAccBucketReplicationConfigurationBase(rName) + `
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1546,6 +1570,8 @@ resource "aws_s3_bucket_versioning" "source" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1625,6 +1651,8 @@ resource "aws_s3_bucket_versioning" "source" {
 }
 
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1658,6 +1686,8 @@ func testAccBucketReplicationConfiguration_filter_tag(rName, key, value string) 
 		testAccBucketReplicationConfigurationBase(rName),
 		fmt.Sprintf(`
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1689,6 +1719,8 @@ func testAccBucketReplicationConfiguration_filter_andOperator_tags(rName, key1, 
 		testAccBucketReplicationConfigurationBase(rName),
 		fmt.Sprintf(`
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1722,6 +1754,8 @@ func testAccBucketReplicationConfiguration_filter_andOperator_prefixAndTags(rNam
 		testAccBucketReplicationConfigurationBase(rName),
 		fmt.Sprintf(`
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1754,6 +1788,8 @@ resource "aws_s3_bucket_replication_configuration" "test" {
 func testAccBucketReplicationConfiguration_schemaV2DestinationMetrics_statusOnly(rName, storageClass string) string {
 	return testAccBucketReplicationConfigurationBase(rName) + fmt.Sprintf(`
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
@@ -1785,6 +1821,8 @@ func testAccBucketReplicationConfigurationWithoutPrefix(rName string) string {
 		testAccBucketReplicationConfigurationBase(rName),
 		`
 resource "aws_s3_bucket_replication_configuration" "test" {
+  depends_on = [aws_s3_bucket_versioning.source]
+
   bucket = aws_s3_bucket.source.id
   role   = aws_iam_role.test.arn
 
