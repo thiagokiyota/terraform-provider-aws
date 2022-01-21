@@ -138,10 +138,6 @@ resource "aws_s3_bucket" "versioning_bucket" {
   bucket = "my-versioning-bucket"
   acl    = "private"
 
-  versioning {
-    enabled = true
-  }
-
   lifecycle_rule {
     prefix  = "config/"
     enabled = true
@@ -159,6 +155,13 @@ resource "aws_s3_bucket" "versioning_bucket" {
     noncurrent_version_expiration {
       days = 90
     }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "versioning" {
+  bucket = aws_s3_bucket.versioning_bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 ```
@@ -246,9 +249,12 @@ resource "aws_iam_role_policy_attachment" "replication" {
 
 resource "aws_s3_bucket" "destination" {
   bucket = "tf-test-bucket-destination-12345"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "destination" {
+  bucket = aws_s3_bucket.destination.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
@@ -256,10 +262,6 @@ resource "aws_s3_bucket" "source" {
   provider = aws.central
   bucket   = "tf-test-bucket-source-12345"
   acl      = "private"
-
-  versioning {
-    enabled = true
-  }
 
   replication_configuration {
     role = aws_iam_role.replication.arn
@@ -286,6 +288,13 @@ resource "aws_s3_bucket" "source" {
         }
       }
     }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "source" {
+  bucket = aws_s3_bucket.source.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 ```

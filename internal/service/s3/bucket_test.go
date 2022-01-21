@@ -4057,27 +4057,29 @@ func testAccBucketReplicationWithConfigurationConfig(randInt int, storageClass s
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      prefix = "foo"
-      status = "Enabled"
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "%[2]s"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+
+  rule {
+    id     = "foobar"
+    prefix = "foo"
+    status = "Enabled"
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "%[2]s"
+    }
   }
 }
 `, randInt, storageClass)
@@ -4090,35 +4092,36 @@ func testAccBucketReplicationWithReplicationConfigurationWithRTCConfig(randInt i
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-rtc-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-    rules {
-      id     = "rtc"
-      status = "Enabled"
-      filter {
-        tags = {}
-      }
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-        metrics {
-          status  = "Enabled"
-          minutes = %[2]d
-        }
-        replication_time {
-          status  = "Enabled"
-          minutes = %[2]d
-        }
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+  rule {
+    id     = "rtc"
+    status = "Enabled"
+    filter {
+      tags = {}
+    }
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+      metrics {
+        status  = "Enabled"
+        minutes = %[2]d
+      }
+      replication_time {
+        status  = "Enabled"
+        minutes = %[2]d
+      }
+    }
   }
 }
 `, randInt, minutes))
@@ -4131,31 +4134,33 @@ func testAccBucketReplicationWithReplicationConfigurationWithRTCNoMinutesConfig(
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-rtc-no-minutes-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-    rules {
-      id     = "rtc-no-minutes"
-      status = "Enabled"
-      filter {
-        tags = {}
-      }
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-        metrics {}
-        replication_time {
-          status = "Enabled"
-        }
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+  rule {
+    id     = "rtc-no-minutes"
+    status = "Enabled"
+    filter {
+      tags = {}
+    }
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+      metrics {}
+      replication_time {
+        status = "Enabled"
+      }
+    }
   }
 }
 `, randInt))
@@ -4168,31 +4173,32 @@ func testAccBucketReplicationWithReplicationConfigurationWithRTCNoStatusConfig(r
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-rtc-no-minutes-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-    rules {
-      id     = "rtc-no-status"
-      status = "Enabled"
-      filter {
-        prefix = "foo"
-      }
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-        metrics {}
-        replication_time {
-          minutes = 15
-        }
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+  rule {
+    id     = "rtc-no-status"
+    status = "Enabled"
+    filter {
+      prefix = "foo"
+    }
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+      metrics {}
+      replication_time {
+        minutes = 15
+      }
+    }
   }
 }
 `, randInt))
@@ -4205,29 +4211,30 @@ func testAccBucketReplicationWithReplicationConfigurationWithRTCNoConfigConfig(r
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-rtc-no-config-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-    rules {
-      id     = "rtc-no-config"
-      status = "Enabled"
-      filter {
-        prefix = "foo"
-      }
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-        metrics {}
-        replication_time {}
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+  rule {
+    id     = "rtc-no-config"
+    status = "Enabled"
+    filter {
+      prefix = "foo"
+    }
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+      metrics {}
+      replication_time {}
+    }
   }
 }
 `, randInt))
@@ -4268,55 +4275,69 @@ resource "aws_s3_bucket_versioning" "destination3" {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id       = "rule1"
-      priority = 1
-      status   = "Enabled"
-
-      filter {}
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-
-    rules {
-      id       = "rule2"
-      priority = 2
-      status   = "Enabled"
-
-      filter {}
-
-      destination {
-        bucket        = aws_s3_bucket.destination2.arn
-        storage_class = "STANDARD_IA"
-      }
-    }
-
-    rules {
-      id       = "rule3"
-      priority = 3
-      status   = "Disabled"
-
-      filter {}
-
-      destination {
-        bucket        = aws_s3_bucket.destination3.arn
-        storage_class = "ONEZONE_IA"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have versioning enabled in the bucket first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id       = "rule1"
+    priority = 1
+    status   = "Enabled"
+
+    filter {}
+
+    delete_marker_replication {
+      status = "Enabled"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
+  }
+
+  rule {
+    id       = "rule2"
+    priority = 2
+    status   = "Enabled"
+
+    filter {}
+
+    delete_marker_replication {
+      status = "Enabled"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination2.arn
+      storage_class = "STANDARD_IA"
+    }
+  }
+
+  rule {
+    id       = "rule3"
+    priority = 3
+    status   = "Disabled"
+
+    filter {}
+
+    delete_marker_replication {
+      status = "Enabled"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination3.arn
+      storage_class = "ONEZONE_IA"
+    }
   }
 }
 `, randInt))
@@ -4357,67 +4378,56 @@ resource "aws_s3_bucket_versioning" "destination3" {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id       = "rule1"
-      priority = 1
-      status   = "Enabled"
-
-      filter {
-        prefix = "prefix1"
-      }
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-
-    rules {
-      id       = "rule2"
-      priority = 2
-      status   = "Enabled"
-
-      filter {
-        tags = {
-          Key2 = "Value2"
-        }
-      }
-
-      destination {
-        bucket        = aws_s3_bucket.destination2.arn
-        storage_class = "STANDARD_IA"
-      }
-    }
-
-    rules {
-      id       = "rule3"
-      priority = 3
-      status   = "Disabled"
-
-      filter {
-        prefix = "prefix3"
-
-        tags = {
-          Key3 = "Value3"
-        }
-      }
-
-      destination {
-        bucket        = aws_s3_bucket.destination3.arn
-        storage_class = "ONEZONE_IA"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id       = "rule1"
+    priority = 1
+    status   = "Enabled"
+
+    filter {
+      prefix = "prefix1"
+    }
+
+    delete_marker_replication {
+      status = "Enabled"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
+  }
+
+  rule {
+    id       = "rule2"
+    priority = 2
+    status   = "Enabled"
+
+    filter {
+      prefix = "prefix2"
+    }
+
+    delete_marker_replication {
+      status = "Enabled"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination2.arn
+      storage_class = "STANDARD_IA"
+    }
   }
 }
 `, randInt))
@@ -4444,48 +4454,56 @@ resource "aws_s3_bucket_versioning" "destination2" {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id       = "rule1"
-      priority = 1
-      status   = "Enabled"
-
-      filter {
-        prefix = "prefix1"
-      }
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-
-    rules {
-      id       = "rule2"
-      priority = 2
-      status   = "Enabled"
-
-      filter {
-        tags = {
-          Key2 = "Value2"
-        }
-      }
-
-      destination {
-        bucket        = aws_s3_bucket.destination2.arn
-        storage_class = "STANDARD_IA"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id       = "rule1"
+    priority = 1
+    status   = "Enabled"
+
+    filter {
+      prefix = "prefix1"
+    }
+
+    delete_marker_replication {
+      status = "Enabled"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
+  }
+
+  rule {
+    id       = "rule2"
+    priority = 2
+    status   = "Enabled"
+
+    filter {
+      prefix = "prefix1"
+    }
+
+    delete_marker_replication {
+      status = "Enabled"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination2.arn
+      storage_class = "STANDARD_IA"
+    }
   }
 }
 `, randInt))
@@ -4502,34 +4520,36 @@ resource "aws_kms_key" "replica" {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      prefix = "foo"
-      status = "Enabled"
-
-      destination {
-        bucket             = aws_s3_bucket.destination.arn
-        storage_class      = "STANDARD"
-        replica_kms_key_id = aws_kms_key.replica.arn
-      }
-
-      source_selection_criteria {
-        sse_kms_encrypted_objects {
-          enabled = true
-        }
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+
+  rules {
+    id     = "foobar"
+    prefix = "foo"
+    status = "Enabled"
+
+    destination {
+      bucket             = aws_s3_bucket.destination.arn
+      storage_class      = "STANDARD"
+      replica_kms_key_id = aws_kms_key.replica.arn
+    }
+
+    source_selection_criteria {
+      sse_kms_encrypted_objects {
+        enabled = true
+      }
+    }
   }
 }
 `, randInt)
@@ -4542,32 +4562,34 @@ data "aws_caller_identity" "current" {}
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      prefix = "foo"
-      status = "Enabled"
-
-      destination {
-        account_id    = data.aws_caller_identity.current.account_id
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-
-        access_control_translation {
-          owner = "Destination"
-        }
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id     = "foobar"
+    prefix = "foo"
+    status = "Enabled"
+
+    destination {
+      account       = data.aws_caller_identity.current.account_id
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+
+      access_control_translation {
+        owner = "Destination"
+      }
+    }
   }
 }
 `, randInt)
@@ -4580,28 +4602,30 @@ data "aws_caller_identity" "current" {}
 resource "aws_s3_bucket" "bucket" {
   acl    = "private"
   bucket = "tf-test-bucket-%[1]d"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      prefix = "foo"
-      status = "Enabled"
-
-      destination {
-        account_id    = data.aws_caller_identity.current.account_id
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id     = "foobar"
+    prefix = "foo"
+    status = "Enabled"
+
+    destination {
+      account       = data.aws_caller_identity.current.account_id
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
   }
 }
 `, randInt)
@@ -4620,39 +4644,43 @@ resource "aws_kms_key" "replica" {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      prefix = "foo"
-      status = "Enabled"
-
-      destination {
-        account_id         = data.aws_caller_identity.current.account_id
-        bucket             = aws_s3_bucket.destination.arn
-        storage_class      = "STANDARD"
-        replica_kms_key_id = aws_kms_key.replica.arn
-
-        access_control_translation {
-          owner = "Destination"
-        }
-      }
-
-      source_selection_criteria {
-        sse_kms_encrypted_objects {
-          enabled = true
-        }
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id     = "foobar"
+    prefix = "foo"
+    status = "Enabled"
+
+    destination {
+      account       = data.aws_caller_identity.current.account_id
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+      encryption_configuration {
+        replica_kms_key_id = aws_kms_key.test.arn
+      }
+
+      access_control_translation {
+        owner = "Destination"
+      }
+    }
+
+    source_selection_criteria {
+      sse_kms_encrypted_objects {
+        status = "Enabled"
+      }
+    }
   }
 }
 `, randInt)
@@ -4663,26 +4691,28 @@ func testAccBucketReplicationWithoutStorageClassConfig(randInt int) string {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      prefix = "foo"
-      status = "Enabled"
-
-      destination {
-        bucket = aws_s3_bucket.destination.arn
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id     = "foobar"
+    prefix = "foo"
+    status = "Enabled"
+
+    destination {
+      bucket = aws_s3_bucket.destination.arn
+    }
   }
 }
 `, randInt)
@@ -4693,26 +4723,28 @@ func testAccBucketReplicationWithoutPrefixConfig(randInt int) string {
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      status = "Enabled"
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id     = "foobar"
+    status = "Enabled"
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
   }
 }
 `, randInt)
@@ -4747,32 +4779,36 @@ func testAccBucketSameRegionReplicationWithV2ConfigurationNoTagsConfig(rName, rN
 resource "aws_s3_bucket" "bucket" {
   bucket = %[1]q
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.test.arn
-
-    rules {
-      id     = "testid"
-      status = "Enabled"
-
-      filter {
-        prefix = "testprefix"
-      }
-
-      delete_marker_replication_status = "Enabled"
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id     = "foobar"
+    status = "Enabled"
+
+    filter {
+      prefix = "foo"
+    }
+
+    delete_marker_replication {
+      status = "Enabled"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
   }
 }
 
@@ -4794,30 +4830,32 @@ func testAccBucketReplicationWithV2ConfigurationDeleteMarkerReplicationDisabledC
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      status = "Enabled"
-
-      filter {
-        prefix = "foo"
-      }
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+
+  rules {
+    id     = "foobar"
+    status = "Enabled"
+
+    filter {
+      prefix = "foo"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
   }
 }
 `, randInt)
@@ -4828,32 +4866,36 @@ func testAccBucketReplicationWithV2ConfigurationNoTagsConfig(randInt int) string
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      status = "Enabled"
-
-      filter {
-        prefix = "foo"
-      }
-
-      delete_marker_replication_status = "Enabled"
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.test.arn
+
+  rule {
+    id     = "foobar"
+    status = "Enabled"
+
+    filter {
+      prefix = "foo"
+    }
+
+    delete_marker_replication {
+      status = "Enabled"
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
   }
 }
 `, randInt)
@@ -4864,34 +4906,36 @@ func testAccBucketReplicationWithV2ConfigurationOnlyOneTagConfig(randInt int) st
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      status = "Enabled"
-
-      priority = 42
-
-      filter {
-        tags = {
-          ReplicateMe = "Yes"
-        }
-      }
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+
+  rule {
+    id     = "foobar"
+    status = "Enabled"
+
+    priority = 42
+
+    filter {
+      tags = {
+        ReplicateMe = "Yes"
+      }
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
   }
 }
 `, randInt)
@@ -4902,37 +4946,39 @@ func testAccBucketReplicationWithV2ConfigurationPrefixAndTagsConfig(randInt int)
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      status = "Enabled"
-
-      priority = 41
-
-      filter {
-        prefix = "foo"
-
-        tags = {
-          AnotherTag  = "OK"
-          ReplicateMe = "Yes"
-        }
-      }
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+
+  rule {
+    id     = "foobar"
+    status = "Enabled"
+
+    priority = 41
+
+    filter {
+      prefix = "foo"
+
+      tags = {
+        AnotherTag  = "OK"
+        ReplicateMe = "Yes"
+      }
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
   }
 }
 `, randInt)
@@ -4943,34 +4989,36 @@ func testAccBucketReplicationWithV2ConfigurationMultipleTagsConfig(randInt int) 
 resource "aws_s3_bucket" "bucket" {
   bucket = "tf-test-bucket-%[1]d"
   acl    = "private"
-
-  replication_configuration {
-    role = aws_iam_role.role.arn
-
-    rules {
-      id     = "foobar"
-      status = "Enabled"
-
-      filter {
-        tags = {
-          AnotherTag  = "OK"
-          Foo         = "Bar"
-          ReplicateMe = "Yes"
-        }
-      }
-
-      destination {
-        bucket        = aws_s3_bucket.destination.arn
-        storage_class = "STANDARD"
-      }
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "test" {
+  # Must have bucket versioning enabled first
+  bucket = aws_s3_bucket_versioning.bucket.bucket
+  role   = aws_iam_role.role.arn
+
+  rule {
+    id     = "foobar"
+    status = "Enabled"
+
+    filter {
+      tags = {
+        AnotherTag  = "OK"
+        Foo         = "Bar"
+        ReplicateMe = "Yes"
+      }
+    }
+
+    destination {
+      bucket        = aws_s3_bucket.destination.arn
+      storage_class = "STANDARD"
+    }
   }
 }
 `, randInt)
